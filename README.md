@@ -14,12 +14,12 @@ This project is a Dockerized Node.js service that provides a flexible API for up
 
 ### Running the Service
 
-1. **Docker**: The service is fully containerized and can be run using Docker:
+1. **Docker**: The service is fully containerized and can be run using Docker. This command will start the service with a reset time of 30 seconds:
 
    ```bash
-   docker run -d -p 3000:3000 your-dockerhub-username/csv-service:latest
+   docker run -d -p 3000:3000 -e RESET_TIME_MS=30000 robgarciab/csv-service:latest
     ```
-   
+
 2. **API** Endpoints:
    - Upload CSV: POST /upload
    - Retrieve Chunked Data: GET /splitedfile?filename=yourfile.csv&n=20
@@ -33,8 +33,6 @@ The service is built with cloud deployment in mind, allowing you to run it on an
 For local development, clone the repository and install dependencies:
     
 ```bash
-git clone https://github.com/yourusername/csv-service.git
-cd csv-service
 npm install
 ```
 
