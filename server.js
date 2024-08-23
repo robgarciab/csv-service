@@ -18,6 +18,35 @@ let resetTimers = {};
 // Get RESET_TIME_MS from environment variables or default to 5 minutes
 const RESET_TIME_MS = process.env.RESET_TIME_MS ? parseInt(process.env.RESET_TIME_MS, 10) : 5 * 60 * 1000;
 
+// Initialize csvData with files in the /uploads folder
+function initializeCsvData() {
+  const uploadDir = path.join(__dirname, 'uploads');
+
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) {
+      console.error('Error reading uploads directory:', err);
+      return;
+    }
+
+    files.forEach((file) => {
+      const filePath = path.join(uploadDir, file);
+      const data = [];
+
+      fs.createReadStream(filePath)
+          .pipe(csv())
+          .on('data', (row) => {
+            data.push(row);
+          })
+          .on('end', () => {
+            csvData[file] = data;
+            currentIndexes[file] = 0;
+            setResetTimer(file); // Set a reset timer for each file
+            console.log(`File ${file} initialized with ${data.length} records.`);
+          });
+    });
+  });
+}
+
 // Upload and parse the CSV file
 app.post('/upload', upload.single('file'), (req, res) => {
   const filename = req.file.originalname;
@@ -86,10 +115,11 @@ function clearAllTimers() {
   }
 }
 
-// Start the server and export it for testing
+// Start the server and initialize csvData
 const server = app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log(`Reset time is set to ${RESET_TIME_MS / 1000} seconds.`);
+  initializeCsvData(); // Initialize csvData on server start
 });
 
 // Clear timers when the server is closed
